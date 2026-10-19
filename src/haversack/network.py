@@ -10,7 +10,7 @@ import numpy as np
 import torch
 
 from .errors import ModelNotFound, UnsupportedModel
-from .shuffleup import swap_transposed
+from .shuffleup import surgered_state, swap_transposed
 
 DTYPES = {"fp32": torch.float32, "fp16": torch.float16, "bf16": torch.bfloat16}
 ACCUMULATE = ("auto", "device", "host")
@@ -473,7 +473,23 @@ class TorchModel:
         # thread copying weights to the GPU contends with a running prediction - measured on
         # an A10 at batch 4, prefetching whole models cost more network time than it saved.
         self.net = p.network.eval()
-        self.n_swapped = swap_transposed(self.net) if surgery else 0
+        # nnU-Net wraps the network in torch.compile when its nnUNet_compile variable is set, and
+        # the wrapper prefixes `_orig_mod.` to every module and state-dict name - names no
+        # checkpoint uses. So the surgery's mapping and every fold load address the module inside
+        # it, as nnU-Net's own fold loop does (2026-10-18: found by review; addressing the wrapper
+        # failed every surgered model under compile, single folds included).
+        self._module = getattr(self.net, "_orig_mod", self.net)
+        self.n_swapped = swap_transposed(self._module) if surgery else 0
+        if self.n_swapped:
+            # The surgery was built from the weights the network holds, which are fold 0's; every
+            # fold's checkpoint still names ConvTranspose3d tensors. Map each into the surgered
+            # network's names once, here, with the rest of the CPU work (2026-10-18: before this,
+            # every fold after the first raised, so no multi-fold model ran with surgery on). The
+            # predictor's own list is replaced too: it describes the network it holds, and keeping
+            # the old dicts alive beside the new ones would hold the transposed weights twice.
+            self.fold_params = [surgered_state(s, self._module) for s in self.fold_params]
+            p.list_of_parameters = self.fold_params
+        self._held = 0          # the fold the network holds: nnU-Net's initialize loaded fold 0
         self.net.to(self.dtype)
         self.channels_last = channels_last
         self._gaussian_cpu = compute_gaussian(self.patch, sigma_scale=1. / 8, value_scaling_factor=10,
@@ -518,22 +534,15 @@ class TorchModel:
 
     # -- sliding window ------------------------------------------------------------
     def _load_fold(self, i: int) -> None:
-        state = self.fold_params[i]
-        if self.n_swapped:
-            # the checkpoint holds ConvTranspose3d weights; re-derive the shuffled 1x1 convs
-            from .shuffleup import ShuffleUp3d
-            current = dict(self.net.named_modules())
-            tmp = {}
-            for name, m in current.items():
-                if isinstance(m, ShuffleUp3d):
-                    tmp[name] = m
-            # simplest exact route: load into a fresh fp32 copy of the architecture is expensive;
-            # for now only fold 0 (already loaded at init) is supported with surgery.
-            if i != 0:
-                raise NotImplementedError("multi-fold with ShuffleUp3d surgery: load folds before surgery (todo)")
+        """Make the network hold fold ``i``. A no-op for the fold it already holds, so a
+        single-fold model never reloads, and a multi-fold one pays one copy per fold per volume
+        (a call ends holding the last fold, so the next starts by loading fold 0 again)."""
+        if i == self._held:
             return
-        self.net.load_state_dict(state)
-        self.net.to(self.dtype)
+        self._held = None       # a load that raises leaves the network holding no known fold
+        # copies into the existing tensors, which keep their dtype and device: no cast after it
+        self._module.load_state_dict(self.fold_params[i])
+        self._held = i
 
     def tiles(self, extent_zyx) -> int:
         """Patches :meth:`predict_logits` runs, per fold, over an input of ``extent_zyx``."""

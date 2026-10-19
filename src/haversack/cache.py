@@ -38,7 +38,10 @@ class ModelCache:
     def _key(folder, *, folds, device, dtype, accumulate, batch_size,
              allow_transpose=False, step_size=0.5) -> tuple:
         # every argument that changes what gets built or where it lives is part of the key;
-        # reusing a model built under a different policy would silently ignore the new one
+        # reusing a model built under a different policy would silently ignore the new one.
+        # TorchModel's `surgery` is not here because `get` never takes it: every model this
+        # cache builds is surgered (the default). A choice added to `get` must be added here
+        # too - tests/test_multifold_surgery.py holds the two signatures equal (2026-10-18).
         f = folds if isinstance(folds, str) else tuple(int(x) for x in folds)
         return (str(Path(folder)), f, str(device), str(dtype), str(accumulate),
                 str(batch_size), bool(allow_transpose), float(step_size))

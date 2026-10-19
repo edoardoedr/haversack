@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+- **Multi-fold nnU-Net ensembles run.** haversack rewrites each transposed convolution as an
+  exact 1x1x1 convolution plus depth-to-space (`ShuffleUp3d`, so the decoder runs in half
+  precision on MPS), on every device, by default - and until now it refused every fold after
+  the first with that rewrite on. No shipped catalog runs more than one fold, so nothing hit
+  it; the first model folder that did (Steve Pieper's LNQ lymph-node models, 4-5 folds each)
+  could not run at all. Each fold's checkpoint is now mapped into the rewritten network once,
+  at load, by the same function that builds the rewrite (`shuffleup.as_shuffled`), and a fold
+  already held is not loaded again. On the four LNQ models over a chest CT and a
+  chest-abdomen-pelvis CT (CUDA, fp16), the ensemble's logits were identical with the rewrite
+  on and off, and its labels within 21 voxels of nnU-Net's own predictor. With nnU-Net's
+  `nnUNet_compile` set, the rewrite and the fold loads now address the network inside
+  torch.compile's wrapper, as nnU-Net's own loop does. No result computed before changes: a
+  single-fold model holds the same weights, and no multi-fold result could be computed.
+
 - **A CPU run no longer needs a second accumulator's worth of memory at the end.** The host
   accumulator's non-finite check was `torch.isfinite(acc).all()`, which on the CPU materializes
   full-size intermediates before reducing them: on a 755 MB fp16 accumulator (K=18 at a
