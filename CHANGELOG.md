@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-10-22
+
+The release that ends the 0.16.0 candidates, every sibling pinned to a tag: **labelfield
+v0.1.5, rankfield v0.3.11, feldglas v0.2.7, duckn v0.6.3**. It adds the `lnq` catalog - Isomics'
+LNQ lymph-node models, a development release offered with their authors' agreement for testing -
+with the two things it needed: multi-fold ensembles that run with the ShuffleUp3d rewrite on,
+and a catalog's stated folds as a task's default. NIfTI files whose two transforms disagree are
+now placed by their sform, so cached input copies are re-read and results recompute once.
+
 - **The `lnq` catalog: Isomics' LNQ lymph-node models.** Steve Pieper's lnq-segmenter
   (github.com/pieper/lnq-segmenter) publishes four CT lymph-node candidate detectors -
   `lnq:inguinal-v1`, `lnq:abdominopelvic-v1`, `lnq:axillary-v1`, `lnq:mediastinal-v1` - as
