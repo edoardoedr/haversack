@@ -108,8 +108,8 @@ regions) installs differently: each fold's release zip holds a whole training ch
 haversack reads only its network weights out of it over HTTP Range - about half the 815 MB -
 without unpickling it, checking them against the digest its manifest records. Its tasks run
 their 4-5-fold ensemble by default. Their authors describe them as unvalidated preliminary
-research models, not for clinical or diagnostic use, and not yet announced: for evaluation by
-LNQ project collaborators rather than promoted for general use.
+research models, not for clinical or diagnostic use, and this release as a development release,
+not yet announced; it is offered here with their agreement, for testing.
 
 To provision ahead of time:
 

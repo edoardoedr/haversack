@@ -11,8 +11,8 @@
   runs its pickle (the new `haversack.torchfree`); it checks them against the digest
   `tools/gen_lnq_manifest.py` recorded after verifying every whole zip against upstream's
   sha256, and writes a weights-only checkpoint per fold into the stock layout. Their authors
-  call them unvalidated preliminary research models, not for clinical or diagnostic use, and
-  not yet announced.
+  call them unvalidated preliminary research models, not for clinical or diagnostic use; this is
+  a development release, not yet announced, offered here with their agreement for testing.
 
 - **A catalog can state the folds its model is an ensemble of, and a run uses them all.**
   Every task ran fold 0 unless the caller asked otherwise, which is right for TotalSegmentator
