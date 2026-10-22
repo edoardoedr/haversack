@@ -459,7 +459,8 @@ def weights_versions_of(segmenter, task) -> list:
     other task's. A task stating auxiliary classes adds ``auxiliary=0`` (2026-09-22): its
     results used to carry them as unnamed values, and now map them to 0 as upstream does. A
     task whose catalog states its model's orientation adds ``orient=<code>`` (MOOSE,
-    2026-09-26)."""
+    2026-09-26), and one whose catalog states its model's folds adds ``folds=0,1,...`` (LNQ,
+    2026-10-22)."""
     try:
         d = segmenter.describe(task)
         entries = d.get("weights_installed") or []
@@ -468,6 +469,10 @@ def weights_versions_of(segmenter, task) -> list:
                for e in entries] or ["unknown"]
         if d.get("step_size") is not None:
             out.append(f"step={d['step_size']:g}")
+        if d.get("folds"):
+            # the ensemble a catalog states its model is (LNQ, 2026-10-22): a task stating none
+            # runs fold 0, as every key before it did, and adds nothing
+            out.append("folds=" + ",".join(str(f) for f in d["folds"]))
         if d.get("crop"):
             out.append(f"crop={d['crop']}")
         if d.get("auxiliary"):

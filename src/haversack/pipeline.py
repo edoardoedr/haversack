@@ -216,7 +216,7 @@ def _attribution(spec, catalog=None) -> dict:
 
 def segment(image, task: str, *, catalog=None, weights=None, device: str = "auto", dtype: str = "fp16",
             grid="input", interp="linear", outside: str = "background", convention: str = "auto",
-            folds=(0,), accumulate: str = "auto", resampling_order: int = 3, batch_size="auto",
+            folds=None, accumulate: str = "auto", resampling_order: int = 3, batch_size="auto",
             envelope_mm: float | None = None, configuration: str | None = None,
             allow_transpose: bool = False,
             probabilities=None, remove_small_blobs=False,
@@ -235,6 +235,9 @@ def segment(image, task: str, *, catalog=None, weights=None, device: str = "auto
     the TS catalog - each model's own training-time preprocessing.
 
     ``device`` defaults to ``"auto"``: CUDA, then MPS, then CPU.
+
+    ``folds`` defaults to the folds the task's catalog says its model is an ensemble of
+    (``TaskSpec.folds``: LNQ's 4-5), else fold 0; a caller's own choice wins.
 
     ``resampling_order`` is the spline order of a TotalSegmentator model's forward resample; 3
     (cubic) matches what nnU-Net trained the models with. A native nnU-Net model follows its own
@@ -372,7 +375,9 @@ def segment(image, task: str, *, catalog=None, weights=None, device: str = "auto
         # a task's stated tile step (ts.v3: upstream's 0.8); stated nowhere else, so every
         # other task's call - and its provenance - is exactly what it was
         step = {} if spc.step_size is None else {"step_size": spc.step_size}
-        m = models.get(folder, folds=folds, device=device, dtype=dtype,
+        # the caller's folds, else the ensemble the task's catalog states (LNQ), else fold 0
+        use = folds if folds is not None else (spc.folds or (0,))
+        m = models.get(folder, folds=use, device=device, dtype=dtype,
                        accumulate=accumulate, batch_size=batch_size,
                        allow_transpose=allow_transpose, **step)
         # the folder name does NOT identify the weights version - Dataset297 ships as both
@@ -384,7 +389,7 @@ def segment(image, task: str, *, catalog=None, weights=None, device: str = "auto
                               "sha256": rec.get("sha256"), "classes": int(m.K)}
         prov["models"].append({"weights": str(wid), "folder": folder.name,
                                "version": rec.get("tag", "unknown"), "sha256": rec.get("sha256"),
-                               "folds": list(available_folds(folder, folds)), "K": m.K,
+                               "folds": list(available_folds(folder, use)), "K": m.K,
                                "spacing": tuple(round(v, 4) for v in m.spacing_zyx),
                                **step,
                                **({"resampling": nnunet_resampling(m, "data")} if native_order else {}),

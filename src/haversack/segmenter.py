@@ -43,7 +43,7 @@ class Segmenter:
     """
 
     def __init__(self, *, device: str = "auto", dtype: str = "fp16", weights=None,
-                 catalog=None, folds=(0,), accumulate: str = "auto", batch_size="auto",
+                 catalog=None, folds=None, accumulate: str = "auto", batch_size="auto",
                  resampling_order: int = 3, envelope_mm: float | None = None,
                  convention: str = "auto", interp: str = "linear", grid="input",
                  configuration: str | None = None, cache_models: int = 1,
@@ -235,6 +235,14 @@ class Segmenter:
                 continue
         return str(wid)
 
+    def _folds_default(self, stated) -> list:
+        """The folds a run of a task uses when the caller names none: this Segmenter's own
+        ``folds`` if it was given one, else the ensemble the task's catalog states, else fold 0
+        - what ``pipeline.segment`` does with the same three."""
+        if self.policy["folds"] is not None:
+            return list(self.policy["folds"])
+        return list(stated) if stated else [0]
+
     def describe(self, task) -> dict:
         """What a task is and what it needs, without running or downloading anything.
 
@@ -255,7 +263,7 @@ class Segmenter:
             if info is not None and not info.get("materialized", True):
                 # weights not installed yet: report what is knowable without
                 # downloading anything, and how to materialize the rest
-                d = {**info, "folds_default": list(self.policy["folds"]),
+                d = {**info, "folds_default": self._folds_default(info.get("folds")),
                      "hint": "structures are read from the checkpoint once "
                              "installed; prepare() or first use installs it"}
                 if not d.get("structures"):
@@ -287,7 +295,7 @@ class Segmenter:
                 # own remedy - propagating turns a real install into a 404
                 # "unknown task" at every door that catches LookupError.
                 return self._introspection(
-                    {**info, "folds_default": list(self.policy["folds"])})
+                    {**info, "folds_default": self._folds_default(info.get("folds"))})
             if info is not None and not info.get("task_spec", True):
                 # This ecosystem's tasks have no nnU-Net TaskSpec (an engine runs
                 # its own network), so _resolve_spec would raise; its describe IS
@@ -298,7 +306,7 @@ class Segmenter:
                 # drop structures/weights from describe - which moves every
                 # result-cache key and re-splits the API and worker keys.
                 return self._introspection(
-                    {**info, "folds_default": list(self.policy["folds"])})
+                    {**info, "folds_default": self._folds_default(info.get("folds"))})
         spec = _resolve_spec(task, self.catalog)
         from .engines.registry import NNUNETV2
         d = {"name": spec.name, "lineage": spec.lineage, "modality": spec.modality,
@@ -314,7 +322,7 @@ class Segmenter:
              # `structures` alone leaves them guessing
              "label_map": {str(k): spec.label_map[k] for k in sorted(spec.label_map)},
              "weights": [str(w) for w in spec.weights_ids],
-             "folds_default": list(self.policy["folds"]),
+             "folds_default": self._folds_default(spec.folds),
              "configuration": self.policy["configuration"]}
         installed, channels = [], None
         for wid in spec.weights_ids:
@@ -362,6 +370,10 @@ class Segmenter:
             # it changes the output, so the result key carries it (weights_versions_of) - only
             # where a task states one, so no key of a task that states none moves
             d["step_size"] = spec.step_size
+        if spec.folds is not None:
+            # the ensemble the catalog states (LNQ), for the result key the same way: a task
+            # stating none runs fold 0 and keys exactly as before (2026-10-22)
+            d["folds"] = list(spec.folds)
         # The catalog's record carries facts the spec cannot: the manifest's
         # license, release and description, and the attribution block. They
         # used to reach a client only while the task was NOT installed - this
@@ -445,7 +457,8 @@ class Segmenter:
             folder = store.resolve(wid, configuration=self.policy["configuration"],
                                    **spec.model_choice(wid))
             step = {} if spec.step_size is None else {"step_size": spec.step_size}
-            self.models.get(folder, folds=self.policy["folds"], device=self.policy["device"],
+            folds = self.policy["folds"] if self.policy["folds"] is not None else (spec.folds or (0,))
+            self.models.get(folder, folds=folds, device=self.policy["device"],
                             dtype=self.policy["dtype"], accumulate=self.policy["accumulate"],
                             batch_size=self.policy["batch_size"], **step)
         return len(self.models)

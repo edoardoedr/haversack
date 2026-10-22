@@ -1,0 +1,418 @@
+{
+ "source": "https://raw.githubusercontent.com/pieper/lnq-segmenter/274abe275916a4942e47fca95cb1ffb6d0b3b72b/src/lnq_segmenter/_registry.json",
+ "repository": "https://github.com/pieper/lnq-segmenter",
+ "commit": "274abe275916a4942e47fca95cb1ffb6d0b3b72b",
+ "release_status": "Unvalidated preliminary research models. Not for clinical or diagnostic use. Not publicly announced: available for evaluation by project collaborators, but not yet promoted for general use.",
+ "note": "labels are read from each installed checkpoint's own dataset.json, never from here. Each fold's url/sha256/size are the registry's, verified on a full download by this generator; weights_sha256 is torchfree.state_digest of its network_weights, which the install checks after reading them in place. The task-level weights_sha256 digests the folds' digests.",
+ "tasks": {
+  "abdominopelvic-v1": {
+   "url": "https://github.com/pieper/lnq-segmenter/releases/download/abdominopelvic-v1-1.0.0/abdominopelvic-v1-1.0.0-meta.zip",
+   "sha256": "38ae5152a9d4c48e54beacb653f7b4ddca194368b13d5ea3152ee0320631bb77",
+   "size": 33944,
+   "folder": "Dataset000_LNQretro/nnUNetTrainer__nnUNetResEncUNetMPlans__3d_fullres",
+   "tag": "1.0.0",
+   "release": "abdominopelvic-v1-1.0.0",
+   "dataset_id": "000",
+   "modality": "CT",
+   "description": "Abdominal/pelvic CT lymph-node candidate detection (retro6 training). Not for diagnostic use.",
+   "license": "CC-BY-4.0",
+   "attribution": "LNQ-abdominopelvic v1 (abdominopelvic-v1@1.0.0), Isomics, Inc. and the SlicerLNQ contributors, CC BY 4.0. Developed under NCI R01CA235589. Please cite the MICCAI 2023 LNQ Challenge Special Issue (MELBA, doi:10.59275/j.melba.2024-c96g). See https://lnqproject.org and the registry's `project` block for the full citation and acknowledgment set.",
+   "segment": {
+    "segment_name": "Abdominopelvic LNs",
+    "snomed_code": "65150001",
+    "snomed_term": "Intra-abdominal lymph node",
+    "color": [
+     120,
+     220,
+     120
+    ]
+   },
+   "mirroring_axes": [
+    0,
+    1,
+    2
+   ],
+   "weights_sha256": "e2a04faabce4f776ff8f1d9dd1b1c31c903f85ae8a9056b4efa090b8c92f415b",
+   "folds": {
+    "0": {
+     "url": "https://github.com/pieper/lnq-segmenter/releases/download/abdominopelvic-v1-1.0.0/abdominopelvic-v1-1.0.0-fold0.zip",
+     "sha256": "be360c1c3e804bbfd1f9b8bc8932ee7669bd2d673e04560c0f6a40775af94693",
+     "size": 818817953,
+     "member": "abdominopelvic-v1/fold_0/checkpoint_final.pth",
+     "weights_sha256": "8a005f1a4eed33b4af531587a04a3ba538e2282182a8a517bdbd7c2f6f1a5178",
+     "weights_bytes": 409069096,
+     "trainer": "nnUNetTrainer",
+     "configuration": "3d_fullres",
+     "mirroring_axes": [
+      0,
+      1,
+      2
+     ]
+    },
+    "1": {
+     "url": "https://github.com/pieper/lnq-segmenter/releases/download/abdominopelvic-v1-1.0.0/abdominopelvic-v1-1.0.0-fold1.zip",
+     "sha256": "56eb8d62f23987202e4bf4dea6ab864877215938e3572a8714793b4fbbb1e42a",
+     "size": 818816993,
+     "member": "abdominopelvic-v1/fold_1/checkpoint_final.pth",
+     "weights_sha256": "9667c75d2ea6a8dd004d2c306ff3ebf219679cab2329817ca46da056281db2d3",
+     "weights_bytes": 409069096,
+     "trainer": "nnUNetTrainer",
+     "configuration": "3d_fullres",
+     "mirroring_axes": [
+      0,
+      1,
+      2
+     ]
+    },
+    "2": {
+     "url": "https://github.com/pieper/lnq-segmenter/releases/download/abdominopelvic-v1-1.0.0/abdominopelvic-v1-1.0.0-fold2.zip",
+     "sha256": "265d621e0e7a6a57e82e7ebbe307f912eace7a805350418425cbd3672f955f72",
+     "size": 818818401,
+     "member": "abdominopelvic-v1/fold_2/checkpoint_final.pth",
+     "weights_sha256": "6e190e13404f8ab69f7494eb6d246b1107d29ff7e714b23cf26be89bdec99531",
+     "weights_bytes": 409069096,
+     "trainer": "nnUNetTrainer",
+     "configuration": "3d_fullres",
+     "mirroring_axes": [
+      0,
+      1,
+      2
+     ]
+    },
+    "3": {
+     "url": "https://github.com/pieper/lnq-segmenter/releases/download/abdominopelvic-v1-1.0.0/abdominopelvic-v1-1.0.0-fold3.zip",
+     "sha256": "3b81deb5671a7ad71e8096efe1ee79342fff18c5877b09578b291ee7f05eee18",
+     "size": 818818145,
+     "member": "abdominopelvic-v1/fold_3/checkpoint_final.pth",
+     "weights_sha256": "9624f14e8bb74b675d71738cc0463a8c61e00fb7f5be4c32ac260e6dd45fc15a",
+     "weights_bytes": 409069096,
+     "trainer": "nnUNetTrainer",
+     "configuration": "3d_fullres",
+     "mirroring_axes": [
+      0,
+      1,
+      2
+     ]
+    },
+    "4": {
+     "url": "https://github.com/pieper/lnq-segmenter/releases/download/abdominopelvic-v1-1.0.0/abdominopelvic-v1-1.0.0-fold4.zip",
+     "sha256": "b2b7e757cbc48d2b46fe57fc3b1ce985694031a227543d5092bee0bb1df47e44",
+     "size": 818817249,
+     "member": "abdominopelvic-v1/fold_4/checkpoint_final.pth",
+     "weights_sha256": "5d31fd3f75fbdc40d2f6ef5f0b8a9149677c84e313225bff7d51cd83c9cfa77c",
+     "weights_bytes": 409069096,
+     "trainer": "nnUNetTrainer",
+     "configuration": "3d_fullres",
+     "mirroring_axes": [
+      0,
+      1,
+      2
+     ]
+    }
+   }
+  },
+  "axillary-v1": {
+   "url": "https://github.com/pieper/lnq-segmenter/releases/download/axillary-v1-1.0.0/axillary-v1-1.0.0-meta.zip",
+   "sha256": "69a121e088b9643a7194e4a25bf905848b65f00fe389943ff250afb129afb011",
+   "size": 22792,
+   "folder": "Dataset003_LNQaxillary/nnUNetTrainer__nnUNetResEncUNetMPlans__3d_fullres",
+   "tag": "1.0.0",
+   "release": "axillary-v1-1.0.0",
+   "dataset_id": "003",
+   "modality": "CT",
+   "description": "Axillary CT lymph-node candidate detection. Not for diagnostic use.",
+   "license": "CC-BY-4.0",
+   "attribution": "LNQ-axillary v1 (axillary-v1@1.0.0), Isomics, Inc. and the SlicerLNQ contributors, CC BY 4.0. Developed under NCI R01CA235589. Please cite the MICCAI 2023 LNQ Challenge Special Issue (MELBA, doi:10.59275/j.melba.2024-c96g). See https://lnqproject.org and the registry's `project` block for the full citation and acknowledgment set.",
+   "segment": {
+    "segment_name": "Axillary LNs",
+    "snomed_code": "68171009",
+    "snomed_term": "Axillary lymph node group",
+    "color": [
+     255,
+     150,
+     100
+    ]
+   },
+   "mirroring_axes": [
+    0,
+    1,
+    2
+   ],
+   "weights_sha256": "680eae31d09974811b298842e05db5bd64211f3f046b06b9f642e80e8c5573f1",
+   "folds": {
+    "0": {
+     "url": "https://github.com/pieper/lnq-segmenter/releases/download/axillary-v1-1.0.0/axillary-v1-1.0.0-fold0.zip",
+     "sha256": "1d33b5a0824c028b7f8888225f52f6e85d3786d885699eb774e973517c4eedf9",
+     "size": 815538965,
+     "member": "axillary-v1/fold_0/checkpoint_final.pth",
+     "weights_sha256": "519aea65d4f1939bd77c8b7f410c2d40752615194407a8d90adc8f1ea2cb9c50",
+     "weights_bytes": 407430696,
+     "trainer": "nnUNetTrainer",
+     "configuration": "3d_fullres",
+     "mirroring_axes": [
+      0,
+      1,
+      2
+     ]
+    },
+    "1": {
+     "url": "https://github.com/pieper/lnq-segmenter/releases/download/axillary-v1-1.0.0/axillary-v1-1.0.0-fold1.zip",
+     "sha256": "fd11632c296c34e9e6f93ba0aa1cf09be35873c1ff5ff6bc08e699e8b4cd1a67",
+     "size": 815539413,
+     "member": "axillary-v1/fold_1/checkpoint_final.pth",
+     "weights_sha256": "89f7c91ba053eda215c8b2e8916e85bc6f4cab0910a107cc82efc1a911931d50",
+     "weights_bytes": 407430696,
+     "trainer": "nnUNetTrainer",
+     "configuration": "3d_fullres",
+     "mirroring_axes": [
+      0,
+      1,
+      2
+     ]
+    },
+    "2": {
+     "url": "https://github.com/pieper/lnq-segmenter/releases/download/axillary-v1-1.0.0/axillary-v1-1.0.0-fold2.zip",
+     "sha256": "c090643a1d453b91d81aca1b188dd0a99606c09e890556e54b588afe84572459",
+     "size": 815538965,
+     "member": "axillary-v1/fold_2/checkpoint_final.pth",
+     "weights_sha256": "21d1c77e765a0b18045e1587a9314f5377b29989b97643bd014bc2cdac447b70",
+     "weights_bytes": 407430696,
+     "trainer": "nnUNetTrainer",
+     "configuration": "3d_fullres",
+     "mirroring_axes": [
+      0,
+      1,
+      2
+     ]
+    },
+    "3": {
+     "url": "https://github.com/pieper/lnq-segmenter/releases/download/axillary-v1-1.0.0/axillary-v1-1.0.0-fold3.zip",
+     "sha256": "7b62d1f226f429ef647c9098a9545dd90c22c0fb34dfac71796841612616c7bc",
+     "size": 815538965,
+     "member": "axillary-v1/fold_3/checkpoint_final.pth",
+     "weights_sha256": "a6c5db0acbee53ba26f364aeaebf68a84fc47e98d09c0b542437e6760c3de06b",
+     "weights_bytes": 407430696,
+     "trainer": "nnUNetTrainer",
+     "configuration": "3d_fullres",
+     "mirroring_axes": [
+      0,
+      1,
+      2
+     ]
+    },
+    "4": {
+     "url": "https://github.com/pieper/lnq-segmenter/releases/download/axillary-v1-1.0.0/axillary-v1-1.0.0-fold4.zip",
+     "sha256": "2e1e80b274b8443a0f140b538e324ca6b6a4d465ec44298e20222933509ed726",
+     "size": 815539669,
+     "member": "axillary-v1/fold_4/checkpoint_final.pth",
+     "weights_sha256": "41d586aa012210c840a044f2269cf4b0f887c521cdac4c6586c067f48395f812",
+     "weights_bytes": 407430696,
+     "trainer": "nnUNetTrainer",
+     "configuration": "3d_fullres",
+     "mirroring_axes": [
+      0,
+      1,
+      2
+     ]
+    }
+   }
+  },
+  "inguinal-v1": {
+   "url": "https://github.com/pieper/lnq-segmenter/releases/download/inguinal-v1-1.0.0/inguinal-v1-1.0.0-meta.zip",
+   "sha256": "381d89b722af47a0160a500f8963dfdd8bb3237289f7ef3a1b045748f2527747",
+   "size": 23273,
+   "folder": "Dataset001_LNQinguinal/nnUNetTrainer__nnUNetResEncUNetMPlans__3d_fullres",
+   "tag": "1.0.0",
+   "release": "inguinal-v1-1.0.0",
+   "dataset_id": "001",
+   "modality": "CT",
+   "description": "Pelvic/inguinal CT lymph-node candidate detection. Not for diagnostic use.",
+   "license": "CC-BY-4.0",
+   "attribution": "LNQ-inguinal v1 (inguinal-v1@1.0.0), Isomics, Inc. and the SlicerLNQ contributors, CC BY 4.0. Developed under NCI R01CA235589. Please cite the MICCAI 2023 LNQ Challenge Special Issue (MELBA, doi:10.59275/j.melba.2024-c96g). See https://lnqproject.org and the registry's `project` block for the full citation and acknowledgment set.",
+   "segment": {
+    "segment_name": "Inguinal LNs",
+    "snomed_code": "39937001",
+    "snomed_term": "Inguinal lymph node",
+    "color": [
+     240,
+     220,
+     60
+    ]
+   },
+   "mirroring_axes": [
+    0,
+    1,
+    2
+   ],
+   "weights_sha256": "3b13f3989a317d6f4b940621f8978745a0a2f5a8ca86fd8170d48a159af8ffe1",
+   "folds": {
+    "0": {
+     "url": "https://github.com/pieper/lnq-segmenter/releases/download/inguinal-v1-1.0.0/inguinal-v1-1.0.0-fold0.zip",
+     "sha256": "a226bb27e498e35529aba275885b6ad190c8a828ce03268c6213674bef9daeeb",
+     "size": 818818465,
+     "member": "nnUNetTrainer__nnUNetResEncUNetMPlans__3d_fullres/fold_0/checkpoint_final.pth",
+     "weights_sha256": "9a7bc122a786867ff5f9b4d5d5849075ce07336dab8290c7a800d04403ad8c19",
+     "weights_bytes": 409069096,
+     "trainer": "nnUNetTrainer",
+     "configuration": "3d_fullres",
+     "mirroring_axes": [
+      0,
+      1,
+      2
+     ]
+    },
+    "1": {
+     "url": "https://github.com/pieper/lnq-segmenter/releases/download/inguinal-v1-1.0.0/inguinal-v1-1.0.0-fold1.zip",
+     "sha256": "9769fc582eee9a920b50e28de9bf223ef6b4aa5772cab19698da714ce097c862",
+     "size": 818815969,
+     "member": "nnUNetTrainer__nnUNetResEncUNetMPlans__3d_fullres/fold_1/checkpoint_final.pth",
+     "weights_sha256": "dd1bfadcdc3357de27148fdb46fc21b68bfc1d3a84955a4f7aec985ff947ebfe",
+     "weights_bytes": 409069096,
+     "trainer": "nnUNetTrainer",
+     "configuration": "3d_fullres",
+     "mirroring_axes": [
+      0,
+      1,
+      2
+     ]
+    },
+    "2": {
+     "url": "https://github.com/pieper/lnq-segmenter/releases/download/inguinal-v1-1.0.0/inguinal-v1-1.0.0-fold2.zip",
+     "sha256": "7ba4ed96850a0e87a503c858da8cc28503dcbd82da222340c5f9289d5a7c8dd2",
+     "size": 818816673,
+     "member": "nnUNetTrainer__nnUNetResEncUNetMPlans__3d_fullres/fold_2/checkpoint_final.pth",
+     "weights_sha256": "d2a2917a1029a98c416bdef8286207085212e03a1fddabd24d225dced8cc87ab",
+     "weights_bytes": 409069096,
+     "trainer": "nnUNetTrainer",
+     "configuration": "3d_fullres",
+     "mirroring_axes": [
+      0,
+      1,
+      2
+     ]
+    },
+    "3": {
+     "url": "https://github.com/pieper/lnq-segmenter/releases/download/inguinal-v1-1.0.0/inguinal-v1-1.0.0-fold3.zip",
+     "sha256": "336907e781de59aa701e33a1c0af2284785bf120ab76a08ffc016a1f8e1076d4",
+     "size": 818818849,
+     "member": "nnUNetTrainer__nnUNetResEncUNetMPlans__3d_fullres/fold_3/checkpoint_final.pth",
+     "weights_sha256": "11552268805038f1b5cab4e81a2b1a9f7c7e29a9ef3962dda6b4e36d37d165bf",
+     "weights_bytes": 409069096,
+     "trainer": "nnUNetTrainer",
+     "configuration": "3d_fullres",
+     "mirroring_axes": [
+      0,
+      1,
+      2
+     ]
+    }
+   }
+  },
+  "mediastinal-v1": {
+   "url": "https://github.com/pieper/lnq-segmenter/releases/download/mediastinal-v1-1.0.0/mediastinal-v1-1.0.0-meta.zip",
+   "sha256": "3fd3ae12468c79f26cc65edce6b1a8f141d6dfaff92dbf487247c278e422fa3e",
+   "size": 43276,
+   "folder": "Dataset002_LNQmediastinal/nnUNetTrainer__nnUNetResEncUNetMPlans__3d_fullres",
+   "tag": "1.0.0",
+   "release": "mediastinal-v1-1.0.0",
+   "dataset_id": "002",
+   "modality": "CT",
+   "description": "Mediastinal CT lymph-node candidate detection. Not for diagnostic use.",
+   "license": "CC-BY-4.0",
+   "attribution": "LNQ-mediastinal v1 (mediastinal-v1@1.0.0), Isomics, Inc. and the SlicerLNQ contributors, CC BY 4.0. Developed under NCI R01CA235589. Please cite the MICCAI 2023 LNQ Challenge Special Issue (MELBA, doi:10.59275/j.melba.2024-c96g). See https://lnqproject.org and the registry's `project` block for the full citation and acknowledgment set.",
+   "segment": {
+    "segment_name": "Mediastinal LNs",
+    "snomed_code": "91186003",
+    "snomed_term": "Mediastinal lymph node",
+    "color": [
+     200,
+     100,
+     230
+    ]
+   },
+   "mirroring_axes": [
+    0,
+    1,
+    2
+   ],
+   "weights_sha256": "bf26d3cb5edaabadc9e3b4baed2b2ac353831eaca5852d2549019707d2064f9b",
+   "folds": {
+    "0": {
+     "url": "https://github.com/pieper/lnq-segmenter/releases/download/mediastinal-v1-1.0.0/mediastinal-v1-1.0.0-fold0.zip",
+     "sha256": "aaa90de915e03529b835e0674ab7d5169e510fbce785f989aa3f4b64d9c9c41b",
+     "size": 815538907,
+     "member": "mediastinal-v1/fold_0/checkpoint_final.pth",
+     "weights_sha256": "2a2ef8e8e7d771167f84322ba7cc5dbcc2d279631991af066481b03109638249",
+     "weights_bytes": 407430696,
+     "trainer": "nnUNetTrainer",
+     "configuration": "3d_fullres",
+     "mirroring_axes": [
+      0,
+      1,
+      2
+     ]
+    },
+    "1": {
+     "url": "https://github.com/pieper/lnq-segmenter/releases/download/mediastinal-v1-1.0.0/mediastinal-v1-1.0.0-fold1.zip",
+     "sha256": "ae1782abb066113b571863b4d33dbfbb20b6eee65065bbfb1f311c713e5d70da",
+     "size": 815538907,
+     "member": "mediastinal-v1/fold_1/checkpoint_final.pth",
+     "weights_sha256": "45e99564ef53df979d36dcf5c1764ab4e7ce2e6a08a0c77fbf469b2a6bad4244",
+     "weights_bytes": 407430696,
+     "trainer": "nnUNetTrainer",
+     "configuration": "3d_fullres",
+     "mirroring_axes": [
+      0,
+      1,
+      2
+     ]
+    },
+    "2": {
+     "url": "https://github.com/pieper/lnq-segmenter/releases/download/mediastinal-v1-1.0.0/mediastinal-v1-1.0.0-fold2.zip",
+     "sha256": "844a18e070108062559d0fd6fe12d00540df540332fb3068eab335b4252cfc4c",
+     "size": 815538907,
+     "member": "mediastinal-v1/fold_2/checkpoint_final.pth",
+     "weights_sha256": "10e6341905fcdff91cd3d9b2a0e27b94d1af9373bb646dff2a443b6fcf3acb3a",
+     "weights_bytes": 407430696,
+     "trainer": "nnUNetTrainer",
+     "configuration": "3d_fullres",
+     "mirroring_axes": [
+      0,
+      1,
+      2
+     ]
+    },
+    "3": {
+     "url": "https://github.com/pieper/lnq-segmenter/releases/download/mediastinal-v1-1.0.0/mediastinal-v1-1.0.0-fold3.zip",
+     "sha256": "5c5643c5f7a36e72ed396e0157256f7b5610b5db59383f0bcba907777bd49213",
+     "size": 815538907,
+     "member": "mediastinal-v1/fold_3/checkpoint_final.pth",
+     "weights_sha256": "87db51c01bbcb38f85b484237e5faf6b60f9e4b2dcef70063343c39dc818aaf1",
+     "weights_bytes": 407430696,
+     "trainer": "nnUNetTrainer",
+     "configuration": "3d_fullres",
+     "mirroring_axes": [
+      0,
+      1,
+      2
+     ]
+    },
+    "4": {
+     "url": "https://github.com/pieper/lnq-segmenter/releases/download/mediastinal-v1-1.0.0/mediastinal-v1-1.0.0-fold4.zip",
+     "sha256": "f7b48a9848af8ec37527098d34230b759e25293874feef075080ff1cf47530b1",
+     "size": 815538971,
+     "member": "mediastinal-v1/fold_4/checkpoint_final.pth",
+     "weights_sha256": "7950245892fa4ca7b2282f5084710a92aafa1a81e4491b73438a404338b3b858",
+     "weights_bytes": 407430696,
+     "trainer": "nnUNetTrainer",
+     "configuration": "3d_fullres",
+     "mirroring_axes": [
+      0,
+      1,
+      2
+     ]
+    }
+   }
+  }
+ }
+}

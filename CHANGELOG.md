@@ -2,6 +2,26 @@
 
 ## [Unreleased]
 
+- **The `lnq` catalog: Isomics' LNQ lymph-node models.** Steve Pieper's lnq-segmenter
+  (github.com/pieper/lnq-segmenter) publishes four CT lymph-node candidate detectors -
+  `lnq:inguinal-v1`, `lnq:abdominopelvic-v1`, `lnq:axillary-v1`, `lnq:mediastinal-v1` - as
+  stock nnU-Net v2 models (ResEnc-M, 3d_fullres), each a 4- or 5-fold ensemble, weights CC BY
+  4.0. Each fold's release zip holds a whole training checkpoint, 815 MB with the optimizer's
+  momentum, so the install reads only its network weights, in place over HTTP Range, and never
+  runs its pickle (the new `haversack.torchfree`); it checks them against the digest
+  `tools/gen_lnq_manifest.py` recorded after verifying every whole zip against upstream's
+  sha256, and writes a weights-only checkpoint per fold into the stock layout. Their authors
+  call them unvalidated preliminary research models, not for clinical or diagnostic use, and
+  not yet announced.
+
+- **A catalog can state the folds its model is an ensemble of, and a run uses them all.**
+  Every task ran fold 0 unless the caller asked otherwise, which is right for TotalSegmentator
+  (fold 0 is all it ships) and wrong for a model published as an ensemble: LNQ's mediastinal
+  model marks about twice the ensemble's lymph-node volume from fold 0 alone. A task whose
+  catalog states its folds (`TaskSpec.folds`) runs them, reports them as `folds_default`, and
+  says so in its result key (`folds=0,1,2,3,4`); a caller's own `folds` still wins. No other
+  task's folds or key changes.
+
 - **Multi-fold nnU-Net ensembles run.** haversack rewrites each transposed convolution as an
   exact 1x1x1 convolution plus depth-to-space (`ShuffleUp3d`, so the decoder runs in half
   precision on MPS), on every device, by default - and until now it refused every fold after

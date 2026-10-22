@@ -101,8 +101,17 @@ They download on first use: TotalSegmentator models from the TotalSegmentator Gi
 (with the sha256 the manifest records), MOOSE, MRSegmentator, DentalSegmentator,
 TotalVibeSegmentator and CADS from their own hosting, each checked against whatever digest its
 publisher states - Zenodo publishes md5, GitHub sha256. Three TotalVibeSegmentator assets are
-published with no digest at all and so are checked against nothing; the manifest names them. To
-provision ahead of time:
+published with no digest at all and so are checked against nothing; the manifest names them.
+
+The `lnq` catalog (Isomics' LNQ lymph-node models, `lnq:mediastinal-v1` and three other
+regions) installs differently: each fold's release zip holds a whole training checkpoint, and
+haversack reads only its network weights out of it over HTTP Range - about half the 815 MB -
+without unpickling it, checking them against the digest its manifest records. Its tasks run
+their 4-5-fold ensemble by default. Their authors describe them as unvalidated preliminary
+research models, not for clinical or diagnostic use, and not yet announced: for evaluation by
+LNQ project collaborators rather than promoted for general use.
+
+To provision ahead of time:
 
 ```bash
 haversack weights fetch ts.v2:total          # every part the task needs

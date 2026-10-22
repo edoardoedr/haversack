@@ -80,6 +80,11 @@ class TheRecordIsComplete(unittest.TestCase):
                         self.assertNotIn("pmid", ref, f"{ref['title']}: a PMID and a pending note")
                         self.assertRegex(ref["pmid_pending"], r"^\d{4}-\d{2}-\d{2}: ", ref["title"])
                         continue
+                    if ref.get("not_in_pubmed"):     # a venue PubMed does not index (MELBA, a TCIA
+                        # data set, 2026-10-22): looked up by its DOI, dated, and never a PMID
+                        self.assertNotIn("pmid", ref, f"{ref['title']}: a PMID and not in PubMed")
+                        self.assertRegex(ref["not_in_pubmed"], r"^\d{4}-\d{2}-\d{2}: ", ref["title"])
+                        continue
                     self.assertRegex(ref.get("pmid") or "", r"^\d{7,9}$", f"no PMID: {ref['title']}")
         self.assertGreaterEqual(n, 14)
 

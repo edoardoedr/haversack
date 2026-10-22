@@ -322,6 +322,59 @@
    "also_cite": [
     "monai"
    ]
+  },
+  "lnq": {
+   "title": "LNQ (Lymph Node Quantification) lymph-node models",
+   "description": "Four CT lymph-node candidate detectors, one per region (inguinal, abdominopelvic, axillary, mediastinal): nnU-Net v2 ResEnc-M ensembles of 4-5 folds, trained on 20-120 annotated CTs each. Unvalidated preliminary research models, not for clinical or diagnostic use; per their authors, not yet announced - for evaluation by LNQ project collaborators rather than promoted for general use.",
+   "group": "Isomics, Inc. and the SlicerLNQ contributors (Steve Pieper); supported by NCI R01CA235589, Lymph Node Quantification System for Multisite Clinical Trials",
+   "repository": "https://github.com/pieper/lnq-segmenter",
+   "url": "https://lnqproject.org",
+   "license": {
+    "code": "Apache-2.0",
+    "weights": "CC-BY-4.0",
+    "url": "https://creativecommons.org/licenses/by/4.0/",
+    "note": "As MODELS.md states it (reviewed 2026-10-19, the authoritative statement): code Apache-2.0, weights CC BY 4.0, commercial use of both permitted with attribution, which should keep the model's name and version. Earlier metadata gave CC BY-NC 4.0 for abdominopelvic-v1, axillary-v1 and mediastinal-v1 - an error, corrected 2026-10-19; the card.json inside those release bundles still carries it, and MODELS.md wins."
+   },
+   "cite": [
+    {
+     "title": "MICCAI 2023 LNQ Challenge Special Issue",
+     "authors": "Pieper S, Ziegler E, Idris T, Somarouthu B, Dorent R, Harris G, Kikinis R (Eds.)",
+     "journal": "Machine Learning for Biomedical Imaging (MELBA)",
+     "year": 2024,
+     "doi": "10.59275/j.melba.2024-c96g",
+     "not_in_pubmed": "2026-10-22: no PubMed record for this DOI (NCBI ID converter)"
+    },
+    {
+     "title": "Mediastinal Lymph Node Quantification (LNQ): Segmentation of Heterogeneous CT Data (Version 1)",
+     "authors": "Idris T, Somarouthu S, Jacene H, LaCasce A, Ziegler E, Pieper S, Khajavi R, Dorent R, Pujol S, Kikinis R, Harris G",
+     "journal": "The Cancer Imaging Archive (data set)",
+     "year": 2024,
+     "doi": "10.7937/QVAZ-JA09",
+     "not_in_pubmed": "2026-10-22: no PubMed record for this DOI (NCBI ID converter)",
+     "note": "the LNQ dataset, \"where applicable\" (MODELS.md)"
+    },
+    {
+     "title": "National Cancer Institute Imaging Data Commons: Toward Transparency, Reproducibility, and Scalability in Imaging Artificial Intelligence",
+     "authors": "Fedorov A, Longabaugh WJR, Pot D, Clunie DA, Pieper SD, et al.",
+     "journal": "RadioGraphics",
+     "year": 2023,
+     "doi": "10.1148/rg.230180",
+     "pmid": "37999984",
+     "note": "infrastructure (MODELS.md)"
+    },
+    {
+     "title": "The Cancer Imaging Archive (TCIA): Maintaining and Operating a Public Information Repository",
+     "authors": "Clark K, Vendt B, Smith K, Freymann J, Kirby J, Koppel P, Moore S, Phillips S, Maffitt D, Pringle M, Tarbox L, Prior F",
+     "journal": "Journal of Digital Imaging",
+     "year": 2013,
+     "doi": "10.1007/s10278-013-9622-7",
+     "pmid": "23884657",
+     "note": "infrastructure (MODELS.md)"
+    }
+   ],
+   "also_cite": [
+    "nnunetv2"
+   ]
   }
  },
  "engines": {

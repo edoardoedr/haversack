@@ -186,6 +186,13 @@ class TaskSpec:
     #: rules: ``body`` keeps its largest trunk and drops small extremities (2026-09-28). Empty
     #: for every task upstream leaves as the network made it.
     postprocess: tuple = ()
+    #: The folds the task's model is an ensemble of, when its catalog says so; None runs fold 0
+    #: (haversack's default - TotalSegmentator ships fold 0 alone). Steve Pieper's LNQ models
+    #: are 4-5-fold ensembles published to be run whole, and fold 0 alone marks about twice the
+    #: ensemble's lymph-node volume on a chest CT (2026-10-18). A caller's own ``folds`` still
+    #: wins; a stated default enters the result key (``serve.weights_versions_of``), so no
+    #: other task's key moves (2026-10-22).
+    folds: tuple | None = None
 
     def model_choice(self, weights_id) -> dict:
         """``{"trainer"?, "plans"?}`` this task states for ``weights_id`` - the keyword

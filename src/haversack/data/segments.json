@@ -1351,6 +1351,122 @@
         "by": "haversack 0.13.0"
       }
     },
+    "lnq:abdominopelvic-v1": {
+      "task": "lnq:abdominopelvic-v1",
+      "ecosystem": "lnq",
+      "engine": "nnunetv2",
+      "kind": "segments",
+      "modality": "CT",
+      "version": {
+        "release": "abdominopelvic-v1-1.0.0",
+        "tag": "1.0.0",
+        "sha256": "38ae5152a9d4c48e54beacb653f7b4ddca194368b13d5ea3152ee0320631bb77",
+        "url": "https://github.com/pieper/lnq-segmenter/releases/download/abdominopelvic-v1-1.0.0/abdominopelvic-v1-1.0.0-meta.zip",
+        "modality": "CT",
+        "listing": "1"
+      },
+      "source": {
+        "zip": "https://github.com/pieper/lnq-segmenter/releases/download/abdominopelvic-v1-1.0.0/abdominopelvic-v1-1.0.0-meta.zip",
+        "member": "dataset.json"
+      },
+      "segments": [
+        {
+          "id": "retro",
+          "value": 1
+        }
+      ],
+      "mined": {
+        "at": "2026-10-22",
+        "by": "haversack 0.16.0rc2"
+      }
+    },
+    "lnq:axillary-v1": {
+      "task": "lnq:axillary-v1",
+      "ecosystem": "lnq",
+      "engine": "nnunetv2",
+      "kind": "segments",
+      "modality": "CT",
+      "version": {
+        "release": "axillary-v1-1.0.0",
+        "tag": "1.0.0",
+        "sha256": "69a121e088b9643a7194e4a25bf905848b65f00fe389943ff250afb129afb011",
+        "url": "https://github.com/pieper/lnq-segmenter/releases/download/axillary-v1-1.0.0/axillary-v1-1.0.0-meta.zip",
+        "modality": "CT",
+        "listing": "1"
+      },
+      "source": {
+        "zip": "https://github.com/pieper/lnq-segmenter/releases/download/axillary-v1-1.0.0/axillary-v1-1.0.0-meta.zip",
+        "member": "dataset.json"
+      },
+      "segments": [
+        {
+          "id": "axillary_ln",
+          "value": 1
+        }
+      ],
+      "mined": {
+        "at": "2026-10-22",
+        "by": "haversack 0.16.0rc2"
+      }
+    },
+    "lnq:inguinal-v1": {
+      "task": "lnq:inguinal-v1",
+      "ecosystem": "lnq",
+      "engine": "nnunetv2",
+      "kind": "segments",
+      "modality": "CT",
+      "version": {
+        "release": "inguinal-v1-1.0.0",
+        "tag": "1.0.0",
+        "sha256": "381d89b722af47a0160a500f8963dfdd8bb3237289f7ef3a1b045748f2527747",
+        "url": "https://github.com/pieper/lnq-segmenter/releases/download/inguinal-v1-1.0.0/inguinal-v1-1.0.0-meta.zip",
+        "modality": "CT",
+        "listing": "1"
+      },
+      "source": {
+        "zip": "https://github.com/pieper/lnq-segmenter/releases/download/inguinal-v1-1.0.0/inguinal-v1-1.0.0-meta.zip",
+        "member": "dataset.json"
+      },
+      "segments": [
+        {
+          "id": "inguinal_ln",
+          "value": 1
+        }
+      ],
+      "mined": {
+        "at": "2026-10-22",
+        "by": "haversack 0.16.0rc2"
+      }
+    },
+    "lnq:mediastinal-v1": {
+      "task": "lnq:mediastinal-v1",
+      "ecosystem": "lnq",
+      "engine": "nnunetv2",
+      "kind": "segments",
+      "modality": "CT",
+      "version": {
+        "release": "mediastinal-v1-1.0.0",
+        "tag": "1.0.0",
+        "sha256": "3fd3ae12468c79f26cc65edce6b1a8f141d6dfaff92dbf487247c278e422fa3e",
+        "url": "https://github.com/pieper/lnq-segmenter/releases/download/mediastinal-v1-1.0.0/mediastinal-v1-1.0.0-meta.zip",
+        "modality": "CT",
+        "listing": "1"
+      },
+      "source": {
+        "zip": "https://github.com/pieper/lnq-segmenter/releases/download/mediastinal-v1-1.0.0/mediastinal-v1-1.0.0-meta.zip",
+        "member": "dataset.json"
+      },
+      "segments": [
+        {
+          "id": "mediastinal_ln",
+          "value": 1
+        }
+      ],
+      "mined": {
+        "at": "2026-10-22",
+        "by": "haversack 0.16.0rc2"
+      }
+    },
     "monai:brats_mri_segmentation": {
       "task": "monai:brats_mri_segmentation",
       "ecosystem": "monai",
