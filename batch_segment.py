@@ -17,9 +17,21 @@ The config (see ``configs/lungs.toml``)::
     task = "ts.v2:total"                  # the 1.5 mm models: the finest TotalSegmentator ships
     roi = ["lung_upper_lobe_left", "trachea"]   # omit for every structure of the task
 
+    [[segmentations]]
+    task = "ts.v2:lung_vessels"
+    save_logits = true                    # also write the ranked store, lung_vessels.duckn.zip
+    probabilities = "float32"             # and <structure>_prob.nii.gz from it ("uint8": 0-255)
+
 With ``roi`` set, a multi-model task runs only the models that hold those structures
 (``roi_subset = false`` in the ``[[segmentations]]`` entry runs all of them): for the lung
 lobes and trachea of ``ts.v2:total``, the organs model alone. See :func:`roi_subset`.
+
+``save_logits`` writes the task's ranked store (haversack's record of the logits: every
+voxel's classes in rank order with their logit gaps, on the model's grid) from the same run
+that makes the masks. ``probabilities`` converts it to one probability map per structure on
+the input's grid (:func:`store_to_probabilities`); it needs ``save_logits``. A patient whose
+masks and store are there but whose maps are not gets the maps from the store, without the
+network.
 
 Optional top-level keys: ``device`` (``auto``, ``mps``, ``cuda``, ``cpu``), ``overwrite``
 (re-run patients whose files are already there, default false), ``save_multilabel`` (also write
@@ -35,6 +47,7 @@ import tomllib
 from pathlib import Path
 
 NIFTI_SUFFIXES = (".nii.gz", ".nii")
+PROBABILITY_DTYPES = ("float32", "uint8")
 
 
 def patient_name(path: Path) -> str:
@@ -69,6 +82,13 @@ def load_config(path: Path) -> dict:
     for i, s in enumerate(cfg["segmentations"]):
         if "task" not in s:
             raise SystemExit(f"{path}: segmentations[{i}] has no 'task'")
+        dtype = s.get("probabilities")
+        if dtype is not None and dtype not in PROBABILITY_DTYPES:
+            raise SystemExit(f"{path}: segmentations[{i}] probabilities = {dtype!r}; "
+                             f"one of {list(PROBABILITY_DTYPES)}, or leave it out")
+        if dtype is not None and not s.get("save_logits", False):
+            raise SystemExit(f"{path}: segmentations[{i}] ({s['task']}) asks for probabilities, "
+                             "which are made from the ranked store; set save_logits = true")
     return cfg
 
 
@@ -111,11 +131,28 @@ def roi_subset(seg, job: dict) -> list:
     return specs
 
 
+def run_name(run) -> str:
+    """A file name for one run: ``ts.v2:lung_vessels`` -> ``lung_vessels``, a roi_subset part
+    ``ts.v2:total/organs`` -> ``total_organs``."""
+    name = run if isinstance(run, str) else run.name
+    return name.split(":")[-1].replace("/", "_")
+
+
 def output_files(job: dict, structures: list[str], out: Path, save_multilabel: bool) -> list[Path]:
     files = [out / f"{name}.nii.gz" for name in (job.get("roi") or structures)]
     if save_multilabel:
         files.append(out / f"{job['task'].split(':')[-1]}.nii.gz")
     return files
+
+
+def store_files(job: dict, runs: list, out: Path) -> list[Path]:
+    return [out / f"{run_name(r)}.duckn.zip" for r in runs] if job.get("save_logits") else []
+
+
+def probability_files(job: dict, structures: list[str], out: Path) -> list[Path]:
+    if not job.get("probabilities"):
+        return []
+    return [out / f"{name}_prob.nii.gz" for name in (job.get("roi") or structures)]
 
 
 def save_masks(result, job: dict, out: Path, save_multilabel: bool) -> None:
@@ -129,6 +166,136 @@ def save_masks(result, job: dict, out: Path, save_multilabel: bool) -> None:
     if save_multilabel:
         result.save(out / f"{job['task'].split(':')[-1]}.nii.gz")
 
+
+# -- probabilities from a ranked store ------------------------------------------------------
+
+def _lerp(a, axis: int, i0, i1, w):
+    """Linear interpolation of ``a`` along ``axis`` at the rows a labelfield axis table names
+    (``i0 < 0``: outside the stored array, filled later)."""
+    import numpy as np
+    ok = i0 >= 0
+    w = w.astype(np.float32).reshape([-1 if d == axis else 1 for d in range(a.ndim)])
+    return (np.take(a, np.where(ok, i0, 0), axis=axis) * (1 - w)
+            + np.take(a, np.where(ok, i1, 0), axis=axis) * w)
+
+
+def store_to_probabilities(store, out, *, dtype: str = "float32", structures=None,
+                           slab_rows: int = 16):
+    """Write ``<structure>_prob.nii.gz`` for each structure of a ranked store, on the grid and
+    in the orientation of the input it was computed from; returns the maps' argmax as a
+    SimpleITK label image on that grid, to check against the run's own labels.
+
+    The store holds, per class, its deficit ``l_c - max_j l_j``: the logits less a per-voxel
+    constant shared by every class. Softmax ignores such a constant, so interpolating the
+    deficits onto the input grid and taking the softmax there is interpolating the logits and
+    taking the softmax - the same field the run's linear restore takes the argmax of. The
+    mapping from input voxel to model voxel is the store's own frame (its crop, its
+    resampling convention), through the tables ``rankfield.restore`` builds for its labels.
+
+    Outside the stored array - beyond a cascade's crop, where the model never ran - the
+    background has probability 1, as the labels there are background. A class more than the
+    store's clip (8 logits) behind the winner was stored as absent, so probabilities below
+    about 3e-4 read as 0. ``dtype`` ``"float32"`` writes p in [0, 1]; ``"uint8"`` writes
+    ``round(p * 255)``, a quarter of the size at a step of 1/255. ``structures`` limits the
+    maps to those names (others in the store are skipped); the background gets none.
+    """
+    import dataclasses
+
+    import numpy as np
+    import SimpleITK as sitk
+    from rankfield.decode import deficit
+    from rankfield.restore import mapping_of, output_geometry
+    from rankfield.tables import build_tables
+
+    from haversack import io as nio
+    from haversack.ranked_restore import _grid_of, _is_background, _value, parts_of
+    from haversack.ranked_store import open_store
+    from haversack.values import Geometry
+
+    if dtype not in PROBABILITY_DTYPES:
+        raise ValueError(f"dtype {dtype!r}; one of {list(PROBABILITY_DTYPES)}")
+    with open_store(Path(store), "r") as st:
+        parts = parts_of(st.root)
+        if len(parts) != 1:
+            raise ValueError(f"{store}: {len(parts)} parts; this reads a store of one field")
+        part = parts[0]
+        segs = st.root.attrs.asdict()["duckn"]["extensions"]["seg"]["segments"]
+        names = {_value(s): s["name"] for s in segs
+                 if not _is_background(s) and _value(s) is not None}
+        f = part.field                               # planes read once, not once per class
+        field = dataclasses.replace(f, ranks=np.asarray(f.ranks), support=np.asarray(f.support),
+                                    tail=None, tails=None)
+    grid_out, fr = _grid_of(part, "input")
+    if fr is None:
+        raise ValueError(f"{store}: the field carries no frame, so it cannot be placed on its input")
+    values = [int(v) for v in field.labels]          # channel -> label value
+    if 0 not in values:
+        raise ValueError(f"{store}: no background channel among {values}")
+    deficits = np.stack([deficit(field, c) for c in range(len(values))]).astype(np.float32)
+    tz, ty, tx = build_tables(grid_out.shape, deficits.shape[1:], mapping_of(part, grid_out),
+                              interp="linear", outside="background")
+    wanted = {v: n for v, n in names.items() if structures is None or n in structures}
+    channel = {v: c for c, v in enumerate(values)}
+    background = channel[0]
+    np_dtype = np.float32 if dtype == "float32" else np.uint8
+    maps = {n: np.zeros(grid_out.shape, np_dtype) for n in wanted.values()}
+    lut = np.asarray(values, np.uint16 if max(values) > 255 else np.uint8)
+    winner = np.zeros(grid_out.shape, lut.dtype)
+    inside_yx = (ty.i0 >= 0)[:, None] & (tx.i0 >= 0)[None, :]
+    for za in range(0, grid_out.shape[0], slab_rows):
+        zb = min(za + slab_rows, grid_out.shape[0])
+        a = _lerp(deficits, 1, tz.i0[za:zb], tz.i1[za:zb], tz.f[za:zb])
+        a = _lerp(a, 2, ty.i0, ty.i1, ty.f)
+        a = _lerp(a, 3, tx.i0, tx.i1, tx.f)          # (K, slab, Y, X) on the input grid
+        a -= a.max(axis=0, keepdims=True)
+        np.exp(a, out=a)
+        a /= a.sum(axis=0, keepdims=True)
+        outside = ~((tz.i0[za:zb] >= 0)[:, None, None] & inside_yx[None])
+        a[:, outside] = 0.0
+        a[background, outside] = 1.0
+        for v, n in wanted.items():
+            p = a[channel[v]]
+            maps[n][za:zb] = p if dtype == "float32" else np.rint(p * 255)
+        winner[za:zb] = lut[a.argmax(axis=0)]
+
+    geo = Geometry.from_record(output_geometry(part, grid_out, fr,
+                                               tuple((0, n) for n in grid_out.shape)))
+
+    def on_input(arr):
+        arr, g = nio.reorient(arr, geo, fr.original_orientation)
+        return nio.to_image(arr, g)
+
+    out = Path(out)
+    out.mkdir(parents=True, exist_ok=True)
+    for n, arr in maps.items():
+        sitk.WriteImage(on_input(arr), str(out / f"{n}_prob.nii.gz"), True)
+    return on_input(winner)
+
+
+def label_disagreement(labels, winner) -> float | None:
+    """The fraction of voxels where two label images on the same grid differ, or None when
+    they are not on the same grid."""
+    import numpy as np
+    import SimpleITK as sitk
+    if (labels.GetSize() != winner.GetSize()
+            or not np.allclose(labels.GetSpacing(), winner.GetSpacing(), atol=1e-4)
+            or not np.allclose(labels.GetOrigin(), winner.GetOrigin(), atol=1e-3)
+            or not np.allclose(labels.GetDirection(), winner.GetDirection(), atol=1e-4)):
+        return None
+    a, b = sitk.GetArrayViewFromImage(labels), sitk.GetArrayViewFromImage(winner)
+    return float(np.count_nonzero(a != b)) / a.size
+
+
+def report_agreement(result, winner, store: Path) -> None:
+    frac = label_disagreement(result.labels, winner)
+    if frac is None:
+        print(f"  WARNING: the probability maps from {store.name} are not on the masks' grid",
+              file=sys.stderr)
+    else:
+        print(f"  probabilities: argmax differs from the masks at {100 * frac:.4f} % of voxels")
+
+
+# -- the run ---------------------------------------------------------------------------------
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
@@ -154,6 +321,9 @@ def main(argv=None) -> int:
         raise SystemExit(f"no .nii.gz or .nii files in {cfg['input_dir']}")
     print(f"{len(patients)} patient(s), {len(jobs)} task(s): {', '.join(j['task'] for j in jobs)}")
 
+    def done(files):
+        return bool(files) and all(f.exists() for f in files)
+
     failed = []
     for n, path in enumerate(patients, 1):
         name = patient_name(path)
@@ -161,18 +331,38 @@ def main(argv=None) -> int:
         out.mkdir(parents=True, exist_ok=True)
         for job in jobs:
             task = job["task"]
-            expected = output_files(job, structures[task], out, cfg.get("save_multilabel", False))
-            if not cfg.get("overwrite", False) and expected and all(f.exists() for f in expected):
+            masks = output_files(job, structures[task], out, cfg.get("save_multilabel", False))
+            stores = store_files(job, runs[task], out)
+            maps = probability_files(job, structures[task], out)
+            dtype = job.get("probabilities")
+            t0 = time.perf_counter()
+            if not cfg.get("overwrite", False) and done(masks + stores + maps):
                 print(f"[{n}/{len(patients)}] {name} {task}: already done, skipped")
                 continue
-            print(f"[{n}/{len(patients)}] {name} {task} ...", flush=True)
-            t0 = time.perf_counter()
             try:
-                for run in runs[task]:
-                    result = seg.segment(path, run)
-                    save_masks(result, job, out, cfg.get("save_multilabel", False))
-            except (HaversackError, OSError, RuntimeError) as e:
-                print(f"  failed: {e}", file=sys.stderr)
+                if not cfg.get("overwrite", False) and done(masks + stores):
+                    # only the maps are missing: they come from the stores, not the network
+                    print(f"[{n}/{len(patients)}] {name} {task}: probabilities from the stored "
+                          "logits ...", flush=True)
+                    for store in stores:
+                        store_to_probabilities(store, out, dtype=dtype, structures=job.get("roi"))
+                else:
+                    print(f"[{n}/{len(patients)}] {name} {task} ...", flush=True)
+                    for run in runs[task]:
+                        if job.get("save_logits"):
+                            from haversack.ranked_output import segment_to_store
+                            store = out / f"{run_name(run)}.duckn.zip"
+                            result, _ = segment_to_store(path, run, store, run=seg.segment,
+                                                         quiet=True, case=name)
+                        else:
+                            result = seg.segment(path, run)
+                        save_masks(result, job, out, cfg.get("save_multilabel", False))
+                        if dtype:
+                            winner = store_to_probabilities(store, out, dtype=dtype,
+                                                            structures=job.get("roi"))
+                            report_agreement(result, winner, store)
+            except (HaversackError, OSError, RuntimeError, ValueError, KeyError) as e:
+                print(f"  failed: {type(e).__name__}: {e}", file=sys.stderr)
                 failed.append((name, task))
                 continue
             print(f"  done in {time.perf_counter() - t0:.0f} s -> {out}")
