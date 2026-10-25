@@ -43,6 +43,29 @@ Note:
 - **Controllo dell'installazione:** `haversack tasks ts.v2:lung_vessels` deve elencare le 4
   strutture del task.
 
+### Driver NVIDIA più vecchio di CUDA 13
+
+Da PyPI arriva torch compilato per CUDA 13 (`2.14.1+cu130`), che richiede un driver NVIDIA 580
+o più recente. Con un driver più vecchio (`nvidia-smi` mostra per esempio `Driver Version:
+535.288.01  CUDA Version: 12.4`) ogni segmentazione fallisce con:
+
+```
+RuntimeError: The NVIDIA driver on your system is too old (found version 12040)
+```
+
+Se non puoi aggiornare il driver, reinstalla torch e torchvision compilati per CUDA 12.6, che
+funzionano con i driver della serie 12. Vanno reinstallati **insieme**: se resta il torchvision
+di PyPI, l'errore diventa `operator torchvision::nms does not exist`.
+
+```bash
+uv pip install --reinstall "torch==2.14.1" "torchvision==0.29.1" --index-url https://download.pytorch.org/whl/cu126
+python -c "import torch, torchvision; print(torch.__version__, torchvision.__version__, torch.cuda.is_available()); from torchvision.ops import nms; print('ok')"
+```
+
+Deve stampare `2.14.1+cu126 0.29.1+cu126 True` e poi `ok`. Verificato su un server con driver
+535.288.01 e una A100 (partizione MIG 2g.20gb), il 2026-10-24. Se la versione di torch installata
+da haversack cambia, adatta i due numeri: torchvision 0.29 corrisponde a torch 2.14.
+
 ## Uso
 
 1. Metti le TC in una cartella, un file `.nii.gz` o `.nii` per paziente. Il nome del file,
@@ -57,6 +80,9 @@ Note:
 
 Lo script salta i pazienti già completati, quindi dopo un'interruzione basta rilanciarlo.
 Se un paziente fallisce, lo segnala e prosegue con gli altri.
+
+Tempi misurati su una A100 (partizione MIG 2g.20gb) con un paziente (PD-1-Lung-00043): lobi e trachea 21 s, vasi e vie aeree con store e mappe di probabilità 75 s. In
+quella prova la classe più probabile delle mappe differiva dalle maschere nello 0.0008 % dei voxel.
 
 ## La config
 

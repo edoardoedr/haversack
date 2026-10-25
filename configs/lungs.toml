@@ -28,5 +28,5 @@ roi = [
 [[segmentations]]
 task = "ts.v2:lung_vessels"
 save_logits = true         # also write lung_vessels.duckn.zip: the logits as a ranked store
-probabilities = "float32"  # and <structure>_prob.nii.gz from it, on the CT's grid:
+#probabilities = "float32"  # and <structure>_prob.nii.gz from it, on the CT's grid:
                            # "float32" (p in 0-1) or "uint8" (round(p * 255)); leave out for none

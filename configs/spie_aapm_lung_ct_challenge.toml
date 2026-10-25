@@ -1,0 +1,32 @@
+# Lung lobes, trachea and lung vessels for every patient in input_dir.
+#   python batch_segment.py configs/lungs.toml
+
+input_dir = "/home/jovyan/Dataset_Lungs/IDC_dataset/raw_usable/spie_aapm_lung_ct_challenge"          # every *.nii.gz / *.nii in it is one patient
+output_dir = "/home/jovyan/Dataset_Lungs/IDC_dataset/segmentation_total_segmentator_spie_aapm_lung_ct_challenge"    # one subfolder per patient
+
+device = "cuda"            # auto, mps, cuda, cpu
+overwrite = false          # true re-runs patients whose masks are already there
+save_multilabel = false    # true also writes each task's whole label map
+cache_models = 1           # models kept in memory between patients (more is faster, uses more memory)
+
+# Lung lobes and trachea from TotalSegmentator's 1.5 mm models, the finest it ships
+# (total_fast is the 3 mm one). `total` is five 1.5 mm models; with roi set, only the ones
+# holding these structures run - here the organs model alone (Dataset291).
+[[segmentations]]
+task = "ts.v2:total"
+roi_subset = true          # false runs all five models, as `total` does without a roi
+roi = [
+    "lung_upper_lobe_left",
+    "lung_lower_lobe_left",
+    "lung_upper_lobe_right",
+    "lung_middle_lobe_right",
+    "lung_lower_lobe_right",
+    "trachea",
+]
+
+# Airways, airway wall, arteries and veins (no roi: every structure of the task).
+[[segmentations]]
+task = "ts.v2:lung_vessels"
+save_logits = true         # also write lung_vessels.duckn.zip: the logits as a ranked store
+#probabilities = "float32"  # and <structure>_prob.nii.gz from it, on the CT's grid:
+                           # "float32" (p in 0-1) or "uint8" (round(p * 255)); leave out for none
