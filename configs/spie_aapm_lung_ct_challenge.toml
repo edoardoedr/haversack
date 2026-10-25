@@ -7,7 +7,7 @@ output_dir = "/home/jovyan/Dataset_Lungs/IDC_dataset/segmentation_total_segmenta
 device = "cuda"            # auto, mps, cuda, cpu
 overwrite = false          # true re-runs patients whose masks are already there
 save_multilabel = false    # true also writes each task's whole label map
-cache_models = 1           # models kept in memory between patients (more is faster, uses more memory)
+cache_models = 3           # models kept in memory between patients (more is faster, uses more memory)
 
 # Lung lobes and trachea from TotalSegmentator's 1.5 mm models, the finest it ships
 # (total_fast is the 3 mm one). `total` is five 1.5 mm models; with roi set, only the ones
